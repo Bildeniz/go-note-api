@@ -2,7 +2,7 @@ Simple Note API project with GoLang
 
 runing on 0.0.0.0:8080
 # API:
-### * GET "/api/notes"
+### GET "/api/notes"
 returning a list with 200
 ````json
 [
@@ -14,7 +14,7 @@ returning a list with 200
     }
 ]
 ````
-### * POST "/api/notes"
+### POST "/api/notes"
 POST parameter 
 ```JSON
 {
