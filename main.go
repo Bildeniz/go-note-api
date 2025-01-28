@@ -1,7 +1,9 @@
 package main
 
 import (
+	"Go-Note-API/Endpoints"
 	"Go-Note-API/Models"
+	"github.com/gin-gonic/gin"
 	"log"
 )
 
@@ -12,5 +14,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db.Create(&Models.Notes{Title: "New Note", Content: "Hello World"})
+	Models.MakeMigrations(db)
+
+	router := gin.Default()
+
+	Endpoints.RegisterEndpoints(router)
+
+	router.Run(":8080")
 }
