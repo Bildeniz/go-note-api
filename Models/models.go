@@ -8,8 +8,8 @@ import (
 
 type Notes struct {
 	gorm.Model
-	Title   string
-	Content string
+	Title   string `binding:"required,min=1,max=255"`
+	Content string `binding:"required,min=1"`
 }
 
 func MakeMigrations(db *gorm.DB) (*gorm.DB, error) {

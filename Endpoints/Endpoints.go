@@ -7,13 +7,6 @@ import (
 	"net/http"
 )
 
-type notes struct {
-	ID        int    `json:"id"`
-	CreatedAt string `json:"created_at"`
-	Title     string `json:"title"`
-	Content   string `json:"content"`
-}
-
 func connectOr500(c *gin.Context) *gorm.DB {
 	db, err := Models.ConnectDB()
 	if err != nil {
@@ -27,17 +20,38 @@ func connectOr500(c *gin.Context) *gorm.DB {
 func RegisterEndpoints(router *gin.Engine) {
 	api := router.Group("/api")
 	{
-		api.GET("/notes", func(c *gin.Context) {
+		api.GET("/notes", func(c *gin.Context) { // Get all notes
 			db := connectOr500(c)
 
-			var notes []notes
+			var notes []Models.Notes
 			results := db.Find(&notes)
 
 			if results.Error != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "No Notes founded"})
+				return
 			}
 
 			c.JSON(http.StatusOK, notes)
+		})
+
+		api.POST("/notes", func(c *gin.Context) {
+			var newNote Models.Notes
+
+			if err := c.ShouldBindJSON(&newNote); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
+			db := connectOr500(c)
+
+			result := db.Create(&newNote)
+
+			if result.Error != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create note"})
+				return
+			}
+
+			c.JSON(http.StatusCreated, newNote)
 		})
 	}
 }
