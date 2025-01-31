@@ -53,5 +53,57 @@ func RegisterEndpoints(router *gin.Engine) {
 
 			c.JSON(http.StatusCreated, newNote)
 		})
+
+		api.GET("/notes/:id", func(c *gin.Context) {
+			id := c.Param("id")
+			db := connectOr500(c)
+
+			var note Models.Notes
+			results := db.First(&note, id)
+			if results.Error != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Note not found"})
+				return
+			}
+
+			c.JSON(http.StatusOK, note)
+		})
+
+		api.DELETE("/notes/:id", func(c *gin.Context) {
+			id := c.Param("id")
+			db := connectOr500(c)
+
+			result := db.Delete(&Models.Notes{}, id)
+
+			if result.RowsAffected == 0 {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Note not found"})
+				return
+			} else if result.Error != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete note"})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"message": "Note deleted"})
+		})
+
+		api.PUT("/notes/:id", func(c *gin.Context) {
+			id := c.Param("id")
+			db := connectOr500(c)
+
+			var note Models.Notes
+			result := db.First(&note, id)
+
+			if result.Error != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Not Founded"})
+				return
+			}
+
+			if err := c.ShouldBindJSON(&note); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request data"})
+				return
+			}
+
+			db.Save(&note)
+			c.JSON(http.StatusOK, note)
+		})
 	}
 }
